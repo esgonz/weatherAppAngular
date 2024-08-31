@@ -1,0 +1,41 @@
+
+:host {
+    --mdc-filled-text-field-container-color: #181fc2;
+    --mdc-text-field--filled-color: #333;
+  }
+.mdc-text-field--filled:not(.mdc-text-field--disabled) .mdc-text-field__input {
+    color: #333 !important;
+  }
+.input-container {
+margin-bottom: 20px;
+display: flex;
+flex-direction: column;
+gap: 10px;
+background-color: white;
+}
+
+.weather-container {
+margin-top: 20px;
+background-color: white;
+padding: 20px;
+}
+
+.weather-details {
+display: flex;
+flex-direction: column;
+background-color: white;
+}
+
+.weather-item {
+display: flex;
+justify-content: space-between;
+margin-bottom: 10px;
+}
+
+.label {
+font-weight: bold;
+}
+
+.value {
+font-style: italic;
+}

@@ -1,0 +1,47 @@
+<div class="input-container">
+    <mat-form-field>
+      <mat-label>Latitude</mat-label>
+      <input matInput [(ngModel)]="latitude" type="number" placeholder="Enter latitude">
+    </mat-form-field>
+  
+    <mat-form-field>
+      <mat-label>Longitude</mat-label>
+      <input matInput [(ngModel)]="longitude" type="number" placeholder="Enter longitude">
+    </mat-form-field>
+  
+    <button mat-raised-button color="primary" (click)="getWeather()">Get Weather</button>
+  </div>
+  
+  <mat-card *ngIf="weatherData" class="weather-container">
+    <mat-card-title>Current Weather</mat-card-title>
+    <mat-card-content>
+      <div class="weather-details">
+        <div class="weather-item">
+          <span class="label">Location:</span>
+          <span class="value">{{ weatherData.latitude }}, {{ weatherData.longitude }}</span>
+        </div>
+        <div class="weather-item">
+          <span class="label">Temperature:</span>
+          <span class="value">{{ weatherData.current_weather.temperature }} °C</span>
+        </div>
+        <div class="weather-item">
+          <span class="label">Weather Condition:</span>
+          <span class="value">{{ getWeatherCondition(weatherData.current_weather.weathercode) }}</span>
+        </div>
+        <div class="weather-item">
+          <span class="label">Wind Speed:</span>
+          <span class="value">{{ weatherData.current_weather.windspeed }} km/h</span>
+        </div>
+        <div class="weather-item">
+          <span class="label">Wind Direction:</span>
+          <span class="value">{{ weatherData.current_weather.winddirection }}°</span>
+        </div>
+        <div class="weather-item">
+          <span class="label">Time:</span>
+          <span class="value">{{ weatherData.current_weather.time }}</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  
+ 

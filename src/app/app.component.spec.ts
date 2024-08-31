@@ -14,16 +14,16 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have the 'weatherApp' title`, () => {
+  it(`should have the 'weatherAppFront' title`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('weatherApp');
+    expect(app.title).toEqual('weatherAppFront');
   });
 
   it('should render title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, weatherApp');
+    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, weatherAppFront');
   });
 });
