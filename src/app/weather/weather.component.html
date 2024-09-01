@@ -1,0 +1,117 @@
+<div class="input-container">
+  <mat-form-field>
+    <mat-label>Latitude</mat-label>
+    <input matInput [(ngModel)]="latitude" type="number" placeholder="Enter latitude">
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Longitude</mat-label>
+    <input matInput [(ngModel)]="longitude" type="number" placeholder="Enter longitude">
+  </mat-form-field>
+
+  <button mat-raised-button color="primary" (click)="getWeather(); fetchWeatherDetails()">Get Weather</button>
+</div>
+
+<!-- Current Weather Card -->
+<mat-card *ngIf="weatherData" class="weather-container">
+  <mat-card-title>Current Weather</mat-card-title>
+  <mat-card-content>
+    <div class="weather-details">
+      <div class="weather-item">
+        <span class="label">Location:</span>
+        <span class="value">{{ weatherData.latitude }}, {{ weatherData.longitude }}</span>
+      </div>
+      <div class="weather-item">
+        <span class="label">Elevation:</span>
+        <span class="value">{{ weatherData.elevation }} m</span>
+      </div>
+      <div class="weather-item">
+        <span class="label">Temperature:</span>
+        <span class="value">{{ weatherData.current_weather.temperature }} °C</span>
+      </div>
+      <div class="weather-item">
+        <span class="label">Weather Condition:</span>
+        <span class="value">{{ getWeatherCondition(weatherData.current_weather.weathercode) }}</span>
+      </div>
+      <div class="weather-item">
+        <span class="label">Wind Speed:</span>
+        <span class="value">{{ weatherData.current_weather.windspeed }} km/h</span>
+      </div>
+      <div class="weather-item">
+        <span class="label">Wind Direction:</span>
+        <span class="value">{{ weatherData.current_weather.winddirection }}°</span>
+      </div>
+      <div class="weather-item">
+        <span class="label">Time:</span>
+        <span class="value">{{ weatherData.current_weather.time }}</span>
+      </div>
+      <div class="weather-item">
+        <span class="label">Timezone:</span>
+        <span class="value">{{ weatherData.timezone }} ({{ weatherData.timezone_abbreviation }})</span>
+      </div>
+      <div class="weather-item">
+        <span class="label">UTC Offset:</span>
+        <span class="value">{{ weatherData.utc_offset_seconds }} seconds</span>
+      </div>
+      <div class="weather-item">
+        <span class="label">Generation Time:</span>
+        <span class="value">{{ weatherData.generationtime_ms }} ms</span>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<!-- Historical Weather Table -->
+<mat-card *ngIf="weatherDetails.length > 0" class="weather-details-container">
+  <mat-card-title>Historical Weather</mat-card-title>
+  <mat-card-content>
+    <button mat-raised-button color="primary" (click)="downloadWeatherDetailsAsCSV()">Download Weather Details (CSV)</button>
+
+    <table mat-table [dataSource]="weatherDetails" class="mat-elevation-z8">
+      <ng-container matColumnDef="latitude">
+        <th mat-header-cell *matHeaderCellDef> Latitude </th>
+        <td mat-cell *matCellDef="let element"> {{element.latitude}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="longitude">
+        <th mat-header-cell *matHeaderCellDef> Longitude </th>
+        <td mat-cell *matCellDef="let element"> {{element.longitude}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="temperature">
+        <th mat-header-cell *matHeaderCellDef> Temperature </th>
+        <td mat-cell *matCellDef="let element"> {{element.temperature}} °C </td>
+      </ng-container>
+
+      <ng-container matColumnDef="windSpeed">
+        <th mat-header-cell *matHeaderCellDef> Wind Speed </th>
+        <td mat-cell *matCellDef="let element"> {{element.windSpeed}} km/h </td>
+      </ng-container>
+
+      <ng-container matColumnDef="windDirection">
+        <th mat-header-cell *matHeaderCellDef> Wind Direction </th>
+        <td mat-cell *matCellDef="let element"> {{element.windDirection}}° </td>
+      </ng-container>
+
+      <ng-container matColumnDef="localTime">
+        <th mat-header-cell *matHeaderCellDef> Local Time </th>
+        <td mat-cell *matCellDef="let element"> {{element.localTime}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="utc">
+        <th mat-header-cell *matHeaderCellDef> UTC </th>
+        <td mat-cell *matCellDef="let element"> {{element.utc}} </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </mat-card-content>
+</mat-card>
+
+<mat-card *ngIf="weatherDetails.length === 0 && weatherData" class="weather-container">
+  <mat-card-title>No Historical Data</mat-card-title>
+  <mat-card-content>
+    No historical weather data is available for the specified location.
+  </mat-card-content>
+</mat-card>
