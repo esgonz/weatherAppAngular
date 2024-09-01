@@ -1,23 +1,28 @@
-import { Component, OnInit } from '@angular/core';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { HttpClient, HttpClientModule, HttpErrorResponse } from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatTableModule } from '@angular/material/table';
+import { Observable } from "rxjs/internal/Observable";
+import { of } from "rxjs/internal/observable/of";
+import { catchError } from "rxjs/internal/operators/catchError";
 
 @Component({
   selector: 'app-weather',
   standalone: true,
   imports: [
-    HttpClientModule,
-    CommonModule,
-    FormsModule,
+    MatTableModule,
+    MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
     MatCardModule,
-    MatFormFieldModule
+    HttpClientModule,
+    FormsModule,
+    CommonModule
   ],
   templateUrl: './weather.component.html',
   styleUrls: ['./weather.component.scss']
@@ -26,13 +31,16 @@ export class WeatherComponent implements OnInit {
   latitude: number | undefined;
   longitude: number | undefined;
   weatherData: any;
+  weatherDetails: any[] = [];
+  displayedColumns: string[] = ['latitude', 'longitude', 'temperature', 'windSpeed', 'windDirection', 'localTime', 'utc'];
 
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.latitude = 37.7749;
-    this.longitude = -122.4194;
+    this.latitude = -33.4489; // Latitude for Santiago, Chile
+  this.longitude = -70.6693; // Longitude for Santiago, Chile
     this.getWeather();
+    this.fetchWeatherDetails()
   }
 
   getWeather() {
@@ -41,25 +49,64 @@ export class WeatherComponent implements OnInit {
       return;
     }
 
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${this.latitude}&longitude=${this.longitude}&current_weather=true`;
+    const url = `http://localhost:8080/weather-api/weather/?latitude=${this.latitude}&longitude=${this.longitude}`;
     this.http.get(url).subscribe(data => {
       this.weatherData = data;
     });
   }
 
-  getLocation(place: string): { latitude: number, longitude: number } | undefined {
-    const locations: { [key: string]: { latitude: number, longitude: number } } = {
-      'Santiago de Chile': { latitude: -33.4489, longitude: -70.6693 },
-      'Viña del Mar Chile': { latitude: -33.0153, longitude: -71.5500 },
-      'New York': { latitude: 40.7128, longitude: -74.0060 },
-      'Paris': { latitude: 48.8566, longitude: 2.3522 },
-      'Zurich': { latitude: 47.3769, longitude: 8.5417 },
-      'Berlin': { latitude: 52.5200, longitude: 13.4050 },
-      'London': { latitude: 51.5074, longitude: -0.1278 },
-      'Madrid': { latitude: 40.4168, longitude: -3.7038 }
-    };
-    return locations[place] || undefined;
+  getWeatherDetails(): Observable<any[]> {
+    if (this.latitude === undefined || this.longitude === undefined) {
+      alert('Please enter valid latitude and longitude.');
+      return of([]); // Return an empty observable if latitude or longitude is not provided
+    }
+  
+    const url = `http://localhost:8080/weather-api/weather/all?latitude=${this.latitude}&longitude=${this.longitude}`;
+    
+    return this.http.get<any[]>(url).pipe(
+      catchError((error: HttpErrorResponse) => {
+        if (error.status === 404) {
+          console.log('No weather details found for the specified location.');
+        } else {
+          console.log('An error occurred while fetching weather details.');
+        }
+        console.error('Error fetching weather details:', error);
+        return of([]); // Return an empty array if an error occurs
+      })
+    );
   }
+  fetchWeatherDetails() {
+    this.getWeatherDetails().subscribe(data => {
+      this.weatherDetails = data;
+      console.log('Weather Details:', this.weatherDetails); // Log data to check
+    });
+  }
+  // Method to download weather details as CSV
+  downloadWeatherDetailsAsCSV() {
+    if (this.latitude === undefined || this.longitude === undefined) {
+      alert('Please enter valid latitude and longitude.');
+      return;
+    }
+
+    const url = `http://localhost:8080/weather-api/weather/all/csv?latitude=${this.latitude}&longitude=${this.longitude}`;
+    
+    this.http.get(url, { responseType: 'blob' }).subscribe(response => {
+      // Create a link element, set its href to a Blob URL, and trigger a click to download
+      const blob = new Blob([response], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'weather_details.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }, error => {
+      // Handle error
+      console.error('Error downloading CSV:', error);
+      alert('Failed to download weather details.');
+    });
+  }
+
   getWeatherCondition(code: number): string {
     const weatherConditions: { [key: number]: string } = {
       0: 'Cloud development not observed or not observable ☀️',
